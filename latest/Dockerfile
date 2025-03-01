@@ -6,11 +6,16 @@
 # production image and consume unnecessary space.
 #
 
+# IBCLinux-3.21.1.zip
+
 FROM ubuntu:22.04 as setup
 
-ENV IB_GATEWAY_VERSION=10.22.1m
+# Need to use later IB_Gateway version:
+  # 10.34.1c
+  # 10.22.1m 
+ENV IB_GATEWAY_VERSION=10.34.1c
 ENV IB_GATEWAY_RELEASE_CHANNEL=latest
-ENV IBC_VERSION=3.16.0
+ENV IBC_VERSION=3.21.0
 
 # Prepare system
 RUN apt-get update -y
@@ -23,19 +28,23 @@ WORKDIR /tmp/setup
 
 # Install IB Gateway
 # Use this instead of "RUN curl .." to install a local file:
-#COPY ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh .
-RUN curl -sSL https://github.com/UnusualAlpha/ib-gateway-docker/releases/download/ibgateway-${IB_GATEWAY_RELEASE_CHANNEL}%40${IB_GATEWAY_VERSION}/ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh \
-  --output ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh
-RUN curl -sSL https://github.com/UnusualAlpha/ib-gateway-docker/releases/download/ibgateway-${IB_GATEWAY_RELEASE_CHANNEL}%40${IB_GATEWAY_VERSION}/ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh.sha256 \
-  --output ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh.sha256
-RUN sha256sum --check ./ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh.sha256
+COPY ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh .
+# RUN curl -sSL https://github.com/UnusualAlpha/ib-gateway-docker/releases/download/ibgateway-${IB_GATEWAY_RELEASE_CHANNEL}%40${IB_GATEWAY_VERSION}/ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh \
+#   --output ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh
+# RUN curl -sSL https://github.com/UnusualAlpha/ib-gateway-docker/releases/download/ibgateway-${IB_GATEWAY_RELEASE_CHANNEL}%40${IB_GATEWAY_VERSION}/ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh.sha256 \
+#   --output ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh.sha256
+# RUN sha256sum --check ./ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh.sha256
 RUN chmod a+x ./ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh
 RUN ./ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh -q -dir /root/Jts/ibgateway/${IB_GATEWAY_VERSION}
 COPY ./config/ibgateway/jts.ini /root/Jts/jts.ini
 
 # Install IBC
-RUN curl -sSL https://github.com/IbcAlpha/IBC/releases/download/${IBC_VERSION}/IBCLinux-${IBC_VERSION}.zip --output IBCLinux-${IBC_VERSION}.zip
+# RUN curl -sSL https://github.com/IbcAlpha/IBC/releases/download/${IBC_VERSION}/IBCLinux-${IBC_VERSION}.zip --output IBCLinux-${IBC_VERSION}.zip
+
+# Copy IBCLinux zip file into the container
+COPY IBCLinux-${IBC_VERSION}.zip .
 RUN mkdir /root/ibc
+
 RUN unzip ./IBCLinux-${IBC_VERSION}.zip -d /root/ibc
 RUN chmod -R u+x /root/ibc/*.sh 
 RUN chmod -R u+x /root/ibc/scripts/*.sh
@@ -50,7 +59,7 @@ COPY ./scripts /root/scripts
 
 FROM ubuntu:22.04
 
-ENV IB_GATEWAY_VERSION=10.22.1m
+ENV IB_GATEWAY_VERSION=10.34.1c
 
 WORKDIR /root
 

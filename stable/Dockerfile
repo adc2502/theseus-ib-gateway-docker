@@ -7,6 +7,7 @@
 #
 
 FROM ubuntu:22.04 as setup
+# FROM --platform=linux/amd64 ubuntu:22.04
 
 ENV IB_GATEWAY_VERSION=10.19.1j
 ENV IB_GATEWAY_RELEASE_CHANNEL=stable
